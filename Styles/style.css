@@ -1,0 +1,46 @@
+body {
+    background: radial-gradient(circle at bottom, #000010, #020024, #090979, #000);
+    font-family: 'Orbitron', sans-serif;
+    overflow: hidden;
+  }
+  
+  .game-container {
+    position: relative;
+    width: 400px;
+    height: 600px;
+    /*background: url('../images/stars.png') center/cover no-repeat;*/
+    overflow: hidden;
+    box-shadow: 0 0 40px #00e5ff;
+  }
+  
+  /* Rocket */
+  #player {
+    position: absolute;
+    bottom: 10px;
+    left: 180px;
+    width: 40px;
+    height: 70px;
+    background: url('../images/rocket.png') no-repeat center/contain;
+  }
+  
+  /* Comets */
+  .obstacle {
+    position: absolute;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background: url('../images/comet.png') no-repeat center/contain;
+  }
+  
+  /* Game Over text */
+  #gameOver {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff5252;
+    font-size: 28px;
+    text-shadow: 0 0 10px red, 0 0 20px yellow;
+  }
+  
