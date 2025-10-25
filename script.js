@@ -117,3 +117,18 @@ setInterval(() => {
 const levelEl = document.getElementById("level"); 
 let level = 1; 
 let cometSpeed = 4; 
+
+ // Profile dropdown event
+    const profileIcon = document.getElementById('profileIcon');
+    const profileDropdown = document.getElementById('profileDropdown');
+
+    profileIcon.addEventListener('click', () => {
+      profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!profileIcon.contains(e.target) && !profileDropdown.contains(e.target)) {
+        profileDropdown.style.display = 'none';
+      }
+    });

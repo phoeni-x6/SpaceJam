@@ -44,3 +44,35 @@ body {
     text-shadow: 0 0 10px red, 0 0 20px yellow;
   }
   
+  /*user profile*/
+  .profile-container {
+      position: relative;
+      cursor: pointer;
+    }
+    .profile-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: #343a40;
+      border: 1px solid #0dcaf0;
+      border-radius: 0.5rem;
+      min-width: 150px;
+      z-index: 100;
+    }
+    .profile-dropdown a {
+      display: block;
+      padding: 0.5rem 1rem;
+      color: #f8f9fa;
+      text-decoration: none;
+    }
+    .profile-dropdown a:hover {
+      background-color: #0dcaf0;
+      color: #000;
+    }
+
+    .table-dark tbody tr:hover {
+  background-color: #343a40 !important;
+  transform: scale(1.02);
+  transition: 0.2s ease-in-out;
+}
