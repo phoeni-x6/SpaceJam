@@ -122,19 +122,10 @@ $username = $_SESSION['username'];
                 <th scope="col">High Score</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- Hardcoded leaderboard values -->
-              <tr><td>1</td><td>RocketMaster</td><td>9800</td></tr>
-              <tr><td>2</td><td>StarPilot</td><td>9200</td></tr>
-              <tr><td>3</td><td>CometCrusher</td><td>8700</td></tr>
-              <tr><td>4</td><td>AstroAce</td><td>8200</td></tr>
-              <tr><td>5</td><td>GalaxyRider</td><td>7800</td></tr>
-              <tr><td>6</td><td>MoonRacer</td><td>7400</td></tr>
-              <tr><td>7</td><td>SkyBlazer</td><td>7100</td></tr>
-              <tr><td>8</td><td>NovaKing</td><td>6900</td></tr>
-              <tr><td>9</td><td>SpaceDrifter</td><td>6500</td></tr>
-              <tr><td>10</td><td>CosmoChaser</td><td>6000</td></tr>
-            </tbody>
+           <tbody id="leaderboard-body">
+  <tr><td colspan="3">Loading...</td></tr>
+</tbody>
+
           </table>
         </div>
 
@@ -150,6 +141,35 @@ $username = $_SESSION['username'];
 
   <!-- Custom JS -->
   <script src="script.js"></script>
+<script>
+function fetchLeaderboard() {
+  fetch("fetch_leaderboard.php")
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById("leaderboard-body");
+      tbody.innerHTML = "";
+      if (!data.length) {
+        tbody.innerHTML = "<tr><td colspan='3'>No scores yet!</td></tr>";
+        return;
+      }
+      data.forEach(player => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${player.rank}</td>
+            <td>${player.username}</td>
+            <td>${player.score}</td>
+          </tr>`;
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("leaderboard-body").innerHTML =
+        "<tr><td colspan='3'>Error loading leaderboard</td></tr>";
+    });
+}
+
+document.addEventListener("DOMContentLoaded", fetchLeaderboard);
+</script>
 
 </body>
 </html>

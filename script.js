@@ -85,6 +85,29 @@ function gameOver() {
     highScoreEl.textContent = highScore;
   }
 }
+//highscore save
+function gameOver() {
+  gameRunning = false;
+  gameOverText.style.display = "block";
+
+  // Local high score for quick display
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem("spaceJamHighScore", highScore);
+    highScoreEl.textContent = highScore;
+  }
+
+  // Save score to server
+  fetch("save_score.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ score: score, level: "Level 1" })
+  })
+  .then(res => res.text())
+  .then(msg => console.log(msg))
+  .catch(err => console.error("Error saving score:", err));
+}
+
 
 // Restart 
 restartBtn.addEventListener("click", () => {
