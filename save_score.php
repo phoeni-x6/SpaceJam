@@ -40,4 +40,7 @@ if ($result->num_rows > 0) {
 
 echo "Score saved successfully";
 $conn->close();
+//saving score
+
 ?>
+
