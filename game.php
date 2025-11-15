@@ -150,7 +150,7 @@ $username = $_SESSION['username'];
   <!-- Game Container -->
   <div class="game-container border border-info rounded-4 shadow-lg p-2">
     <div id="player"></div>
-    <h2 id="gameOver" class="text-danger fw-bold text-center">💥 Game Over! Press Restart</h2>
+   <h2 id="gameOver" style="display:none;"></h2>
   </div>
 
   <div class="text-light fw-bold mt-3">
@@ -161,7 +161,6 @@ $username = $_SESSION['username'];
     Score: <span id="score">0</span> | High Score: <span id="highScore">0</span>
   </div>
 
-  <!-- 🎛 Fixed Left-Side Game Options -->
 
 <div class="options-container">
   <h5 class="text-info mb-3"><i class="fas fa-sliders-h me-2"></i>Game Options</h5>
@@ -177,23 +176,23 @@ $username = $_SESSION['username'];
 </div>
 
 
-  <!-- Restart Button -->
+
   <button id="restartBtn" class="btn btn-outline-info">
     <i class="fas fa-rotate-right me-2"></i>Restart
   </button>
 
-  <!-- Leaderboard Button -->
+
   <button id="leaderboardBtn" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#leaderboardModal">
     <i class="fas fa-trophy me-2"></i>Leaderboard
   </button>
 
-  <!-- 🆕 Game Instructions Button -->
+  <!--Game Instructions Button -->
   <button id="instructionsBtn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#instructionsModal">
     <i class="fas fa-info-circle me-2"></i>Instructions
   </button>
 </div>
 
-<!-- 🆕 Game Instructions Modal -->
+<!-- Instructions Modal -->
 <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-light border border-info shadow-lg">
@@ -262,6 +261,52 @@ $username = $_SESSION['username'];
     </div>
   </div>
 
+<!-- Game Over Popup Modal (UPDATED) -->
+<div class="modal fade" id="gameOverModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light border border-danger shadow-lg">
+      <div class="modal-header border-danger">
+        <h5 class="modal-title text-danger fw-bold">Game Over!</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <!-- Quiz Image/Text Here -->
+        <div id="quizQuestionArea" class="mb-4">
+          <p class="text-warning">Loading math problem...</p>
+        </div>
+
+        <!-- Input & Button (ALWAYS VISIBLE) -->
+        <input type="number" id="answerField" 
+               class="form-control text-center mb-3 fs-5 py-3 bg-dark border-warning text-light"
+               placeholder="Enter answer..." inputmode="numeric" autocomplete="off" />
+
+        <button id="tryAgainBtn" class="btn btn-outline-danger fw-bold w-100 py-3" disabled>
+          Submit Answer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById("tryAgainBtn").addEventListener("click", () => {
+    const ans = document.getElementById("answerField").value.trim();
+
+    if (ans === "") {
+      alert("Please enter an answer!");
+      return;
+    }
+
+    // Optional: validate answer here
+    console.log("Answer submitted:", ans);
+
+    // Restart the game
+    window.location.reload();
+  });
+</script>
+
+
+
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -269,7 +314,7 @@ $username = $_SESSION['username'];
   <script src="script.js"></script>
 
   <script>
-  // 🏆 Fetch leaderboard
+  //  Fetch leaderboard
   function fetchLeaderboard() {
     fetch("fetch_leaderboard.php")
       .then(res => res.json())
@@ -298,7 +343,7 @@ $username = $_SESSION['username'];
 
   document.addEventListener("DOMContentLoaded", fetchLeaderboard);
 
-  // 🔊 Sound Toggle
+  //  Sound Toggle
   const soundOn = document.getElementById("soundOn");
   const soundOff = document.getElementById("soundOff");
   let soundEnabled = true;
