@@ -74,7 +74,7 @@ function isColliding(a, b) {
 }
 
 
-// BANANA QUIZ API (YOUR EXACT FUNCTION)
+// BANANA QUIZ API 
 
 async function getBananaQuiz() {
   try {
@@ -195,10 +195,6 @@ document.getElementById("answerField").addEventListener("keypress", (e) => {
 
 function restartGameAfterQuiz() {
   gameRunning = true;
-
- 
-
-  
   x = 180;
   y = 10;
   player.style.left = `${x}px`;
