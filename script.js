@@ -1,9 +1,5 @@
-
-
 const player = document.getElementById("player");
 const container = document.querySelector(".game-container");
-const gameOverText = document.getElementById("gameOver");
-const restartBtn = document.getElementById("restartBtn");
 const scoreEl = document.getElementById("score");
 const highScoreEl = document.getElementById("highScore");
 const levelEl = document.getElementById("level");
@@ -13,8 +9,8 @@ let y = 10;
 const step = 50;
 const limitX = container.clientWidth - player.clientWidth;
 const limitY = container.clientHeight - player.clientHeight;
-let gameRunning = true;
 
+let gameRunning = true;
 let score = 0;
 let level = 1;
 let cometSpeed = 4;
@@ -26,9 +22,14 @@ highScoreEl.textContent = highScore;
 // Banana Quiz Global
 let currentQuiz = null;
 
+// INTERVALS
+let cometInterval = null;
+let scoreInterval = null;
+
+// ACTIVE COMETS TRACKER
+let activeComets = [];
 
 // PLAYER CONTROLS
-
 document.addEventListener("keydown", (e) => {
   if (!gameRunning) return;
   switch (e.key) {
@@ -41,9 +42,7 @@ document.addEventListener("keydown", (e) => {
   player.style.bottom = `${y}px`;
 });
 
-
 // SPAWN COMETS
-
 function createObstacle() {
   const obstacle = document.createElement("div");
   obstacle.classList.add("obstacle");
@@ -51,18 +50,21 @@ function createObstacle() {
   container.appendChild(obstacle);
 
   let obstacleY = 0;
+  activeComets.push({ element: obstacle, y: obstacleY });
+
   const fallInterval = setInterval(() => {
-    if (!gameRunning) {
-      clearInterval(fallInterval);
-      obstacle.remove();
-      return;
-    }
+    if (!gameRunning) return; // pause movement
     obstacleY += cometSpeed;
     obstacle.style.top = obstacleY + "px";
     if (isColliding(player, obstacle)) gameOver();
     if (obstacleY > container.clientHeight) {
       obstacle.remove();
+      activeComets = activeComets.filter(c => c.element !== obstacle);
       clearInterval(fallInterval);
+    } else {
+      // Update tracker
+      const comet = activeComets.find(c => c.element === obstacle);
+      if (comet) comet.y = obstacleY;
     }
   }, 30);
 }
@@ -73,9 +75,7 @@ function isColliding(a, b) {
   return !(aRect.top > bRect.bottom || aRect.bottom < bRect.top || aRect.left > bRect.right || aRect.right < bRect.left);
 }
 
-
-// BANANA QUIZ API 
-
+// BANANA QUIZ API
 async function getBananaQuiz() {
   try {
     const r = await fetch("https://www.sanfoh.com/uob/banana/api/random");
@@ -88,10 +88,11 @@ async function getBananaQuiz() {
   }
 }
 
-
-//game over modal with quiz
+// GAME OVER
 async function gameOver() {
-  gameRunning = false;
+  if (!gameRunning) return; // prevent multiple triggers
+
+  gameRunning = false; // pause game
 
   // Save high score
   if (score > highScore) {
@@ -100,16 +101,16 @@ async function gameOver() {
     highScoreEl.textContent = highScore;
   }
 
-fetch("save_score.php", {
+  fetch("save_score.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ score: score, level: `Level ${level}` })
-})
-.then(res => res.json())
-.then(data => {
+  })
+  .then(res => res.json())
+  .then(data => {
     if (!data.success) console.warn("Score save failed:", data.error);
-})
-.catch(err => console.error("Fetch error:", err));
+  })
+  .catch(err => console.error("Fetch error:", err));
 
   // Show modal
   const modal = new bootstrap.Modal(document.getElementById("gameOverModal"));
@@ -119,15 +120,12 @@ fetch("save_score.php", {
   await loadBananaQuizIntoModal();
 }
 
-
-// loading the quiz into the modal
-
+// Load quiz into modal
 async function loadBananaQuizIntoModal() {
   const quizArea = document.getElementById("quizQuestionArea");
   const answerField = document.getElementById("answerField");
   const tryAgainBtn = document.getElementById("tryAgainBtn");
 
-  // Reset
   answerField.value = "";
   tryAgainBtn.disabled = true;
   quizArea.innerHTML = `
@@ -138,7 +136,6 @@ async function loadBananaQuizIntoModal() {
   `;
 
   const quiz = await getBananaQuiz();
-
   if (quiz && quiz.question && quiz.solution !== undefined) {
     quizArea.innerHTML = `
       <p class="text-warning fw-bold mb-3">Solve to continue:</p>
@@ -159,15 +156,10 @@ async function loadBananaQuizIntoModal() {
   setTimeout(() => answerField.focus(), 400);
 }
 
-
-// quiz answer
-
+// QUIZ ANSWER SUBMISSION
 document.getElementById("tryAgainBtn").addEventListener("click", () => {
   const ans = document.getElementById("answerField").value.trim();
-  if (!ans) {
-    alert("Please enter the answer!");
-    return;
-  }
+  if (!ans) return alert("Please enter the answer!");
 
   const userAnswer = parseInt(ans);
   const correctAnswer = parseInt(currentQuiz.solution);
@@ -175,7 +167,7 @@ document.getElementById("tryAgainBtn").addEventListener("click", () => {
   if (userAnswer === correctAnswer) {
     alert("Correct! Game continues from your current score!");
     bootstrap.Modal.getInstance(document.getElementById("gameOverModal")).hide();
-    restartGameAfterQuiz();
+    resumeGame();
   } else {
     alert(`Wrong! The answer was ${correctAnswer}. Try again.`);
     document.getElementById("answerField").value = "";
@@ -183,44 +175,39 @@ document.getElementById("tryAgainBtn").addEventListener("click", () => {
   }
 });
 
-// Enter key support
+// ENTER KEY SUPPORT
 document.getElementById("answerField").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    document.getElementById("tryAgainBtn").click();
-  }
+  if (e.key === "Enter") document.getElementById("tryAgainBtn").click();
 });
 
-
-// score after the quize
-
-function restartGameAfterQuiz() {
+// RESUME GAME FUNCTION
+function resumeGame() {
   gameRunning = true;
-  x = 180;
-  y = 10;
-  player.style.left = `${x}px`;
-  player.style.bottom = `${y}px`;
 
-  // Clear leftover comets
-  document.querySelectorAll(".obstacle").forEach(o => o.remove());
+  // Resume comets that were active
+  activeComets.forEach(cometObj => {
+    const obstacle = cometObj.element;
+    let obstacleY = cometObj.y;
 
-  // Update display
-  scoreEl.textContent = score;
-  levelEl.textContent = level;
+    const fallInterval = setInterval(() => {
+      if (!gameRunning) return;
+      obstacleY += cometSpeed;
+      obstacle.style.top = obstacleY + "px";
+      if (isColliding(player, obstacle)) gameOver();
+      if (obstacleY > container.clientHeight) {
+        obstacle.remove();
+        activeComets = activeComets.filter(c => c.element !== obstacle);
+        clearInterval(fallInterval);
+      } else {
+        cometObj.y = obstacleY;
+      }
+    }, 30);
+  });
 }
 
-
-restartBtn.addEventListener("click", () => {
-  window.location.reload();
-});
-
-
-// score increment and gameloop
-
-setInterval(() => {
-  if (gameRunning) createObstacle();
-}, 1500);
-
-setInterval(() => {
+// GAME LOOPS
+cometInterval = setInterval(() => { if (gameRunning) createObstacle(); }, 1500);
+scoreInterval = setInterval(() => {
   if (gameRunning) {
     score++;
     scoreEl.textContent = score;
@@ -232,63 +219,3 @@ setInterval(() => {
     }
   }
 }, 100);
-
-
-// profile dropdown
-
-const profileIcon = document.getElementById('profileIcon');
-const profileDropdown = document.getElementById('profileDropdown');
-
-if (profileIcon && profileDropdown) {
-  profileIcon.addEventListener('click', () => {
-    profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!profileIcon.contains(e.target) && !profileDropdown.contains(e.target)) {
-      profileDropdown.style.display = 'none';
-    }
-  });
-}
-
-//bg music
-const bgMusic = document.getElementById("bgMusic");
-const musicOn = document.getElementById("musicOn");
-const musicOff = document.getElementById("musicOff");
-
-let musicStarted = false;
-let fadeInterval;
-
-function startMusic() {
-  if (!musicStarted && bgMusic) {
-    bgMusic.volume = 0;
-    bgMusic.play().catch(() => {});
-    fadeInterval = setInterval(() => {
-      if (bgMusic.volume < 0.5) bgMusic.volume = Math.min(bgMusic.volume + 0.05, 0.5);
-      else clearInterval(fadeInterval);
-    }, 200);
-    musicStarted = true;
-  }
-}
-
-if (musicOn && musicOff) {
-  musicOn.addEventListener("click", () => {
-    musicOn.classList.add("active");
-    musicOff.classList.remove("active");
-    startMusic();
-    bgMusic.volume = 0.5;
-  });
-
-  musicOff.addEventListener("click", () => {
-    musicOff.classList.add("active");
-    musicOn.classList.remove("active");
-    clearInterval(fadeInterval);
-    fadeInterval = setInterval(() => {
-      if (bgMusic.volume > 0.05) bgMusic.volume -= 0.05;
-      else { bgMusic.pause(); clearInterval(fadeInterval); }
-    }, 200);
-  });
-}
-
-document.addEventListener("click", startMusic, { once: true });
-document.addEventListener("keydown", startMusic, { once: true });
