@@ -219,3 +219,38 @@ scoreInterval = setInterval(() => {
     }
   }
 }, 100);
+
+document.getElementById("restartBtn").addEventListener("click", () => {
+    restartGame();
+});
+
+function restartGame() {
+
+    // Stop everything
+    gameRunning = false;
+
+    // Clear comets
+    activeComets.forEach(c => c.element.remove());
+    activeComets = [];
+
+    // Reset player position
+    x = 180;
+    y = 10;
+    player.style.left = `${x}px`;
+    player.style.bottom = `${y}px`;
+
+    // Reset stats
+    score = 0;
+    level = 1;
+    cometSpeed = 4;
+
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+
+    // Close modal if open
+    const modal = bootstrap.Modal.getInstance(document.getElementById("gameOverModal"));
+    if (modal) modal.hide();
+
+    // Resume the game
+    gameRunning = true;
+}
