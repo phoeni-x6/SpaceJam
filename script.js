@@ -219,3 +219,6 @@ scoreInterval = setInterval(() => {
     }
   }
 }, 100);
+
+
+

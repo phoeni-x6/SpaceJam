@@ -76,3 +76,28 @@ body {
   transform: scale(1.02);
   transition: 0.2s ease-in-out;
 }
+
+
+/*neo api*/
+.neo-wrapper {
+  width: 340px;
+  left: 1250px; 
+  bottom: 20px;
+}
+
+.neo-card {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+.neo-card.hide-left {
+  transform: translateX(-80%);
+  opacity: 0;
+}
+.neo-card.hide-right {
+  transform: translateX(80%);
+  opacity: 0;
+}
+.neo-card.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+

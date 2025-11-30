@@ -123,6 +123,57 @@ $username = $_SESSION['username'];
 .btn-group .btn.active { background-color: var(--bs-success); color: #fff; }
 </style>
 </head>
+<canvas id="gameBackground"></canvas>
+
+<style>
+  #gameBackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* behind your game */
+    background: black;
+  }
+</style>
+
+<script>
+const canvas = document.getElementById('gameBackground');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const stars = [];
+for(let i = 0; i < 200; i++){
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: Math.random() * 2,
+    speed: Math.random() * 0.5 + 0.2
+  });
+}
+
+function animateStars(){
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  ctx.fillStyle = 'white';
+  stars.forEach(star => {
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+    ctx.fill();
+    
+    star.y += star.speed;
+    if(star.y > canvas.height) star.y = 0;
+  });
+  
+  requestAnimationFrame(animateStars);
+}
+
+animateStars();
+</script>
+
 <body class="bg-dark text-light d-flex flex-column align-items-center vh-100">
 
 <!-- Header -->
@@ -200,6 +251,36 @@ $username = $_SESSION['username'];
     </div>
   </div>
 </div>
+
+<!-- NEO Slider -->
+<div class="neo-wrapper position-absolute top-50 end-0 translate-middle-y me-3 mt-5">
+  <h6 class="text-info fw-bold mb-2 text-center">
+    <i class="fas fa-meteor me-1"></i>Near Earth Objects
+  </h6>
+
+  <div class="neo-slider d-flex align-items-center">
+
+    <!-- Left Arrow -->
+    <button id="neoPrev" class="btn btn-outline-info btn-sm me-2">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <!-- Card Container -->
+    <div id="neoCard" class="neo-card bg-dark border border-info rounded-4 shadow-lg p-3"
+         style="width: 300px; height: 260px; overflow:hidden;">
+      <h5 class="text-warning small text-center mb-2">Loading...</h5>
+    </div>
+
+    <!-- Right Arrow -->
+    <button id="neoNext" class="btn btn-outline-info btn-sm ms-2">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+
+  </div>
+</div>
+
+
+
 
 
 
@@ -389,6 +470,78 @@ learnMoreBtn.addEventListener("click", () => {
   // Show Bootstrap modal
   const apodModal = new bootstrap.Modal(document.getElementById('apodModal'));
   apodModal.show();
+});
+
+
+// NEO
+const neoApiKey = "aGg4WRClHhmQhaYcVy1lcCy6JAoxWFDau6N18ZFO"; 
+const neoUrl = `https://api.nasa.gov/neo/rest/v1/feed?api_key=${neoApiKey}`;
+
+let neoList = [];
+let neoIndex = 0;
+
+function loadNeoCard(index, direction = "right") {
+  const card = document.getElementById("neoCard");
+
+  // Animate out
+  card.classList.remove("show");
+  card.classList.add(direction === "right" ? "hide-right" : "hide-left");
+
+  setTimeout(() => {
+    const neo = neoList[index];
+
+    card.innerHTML = `
+      <h6 class="text-warning fw-bold text-center">${neo.name}</h6>
+      <p class="text-light small">
+        <b>⚡ Speed:</b> ${neo.speed.toLocaleString()} km/h <br>
+        <b>📏 Diameter:</b> ${neo.diameter} m <br>
+        <b>🛑 Hazardous:</b> 
+        <span class="${neo.hazard ? "text-danger" : "text-success"} fw-bold">
+          ${neo.hazard ? "YES" : "NO"}
+        </span> <br>
+        <b>📅 Closest Approach:</b><br>${neo.date}
+      </p>
+    `;
+
+    // Reset animation classes
+    card.classList.remove("hide-right", "hide-left");
+
+    setTimeout(() => card.classList.add("show"), 10);
+  }, 300);
+}
+
+fetch(neoUrl)
+  .then(res => res.json())
+  .then(data => {
+    const nearEarthObjects = data.near_earth_objects;
+    const today = Object.keys(nearEarthObjects)[0];
+
+    neoList = nearEarthObjects[today].map(obj => ({
+      name: obj.name,
+      speed: parseFloat(obj.close_approach_data[0].relative_velocity.kilometers_per_hour),
+      diameter: Math.floor(obj.estimated_diameter.meters.estimated_diameter_max),
+      hazard: obj.is_potentially_hazardous_asteroid,
+      date: obj.close_approach_data[0].close_approach_date_full
+    }));
+
+    // Load first card
+    loadNeoCard(neoIndex);
+  })
+  .catch(err => {
+    document.getElementById("neoCard").innerHTML =
+      `<p class="text-danger text-center small">Failed to load NEO data.</p>`;
+  });
+
+
+// Slider Arrows
+document.getElementById("neoNext").addEventListener("click", () => {
+  neoIndex = (neoIndex + 1) % neoList.length;
+  loadNeoCard(neoIndex, "right");
+});
+
+document.getElementById("neoPrev").addEventListener("click", () => {
+  neoIndex = (neoIndex - 1 + neoList.length) % neoList.length;
+  loadNeoCard(neoIndex, "left");
 });
 
 
