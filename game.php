@@ -138,8 +138,8 @@ $username = $_SESSION['username'];
 
 <!-- Title -->
 <div class="text-center mb-3">
-  <h1 class="fw-bold text-info">🚀 Space Jam Rocket Game</h1>
-  <p class="text-secondary">Use Arrow Keys to Dodge the Comets ☄️</p>
+  <h1 class="fw-bold text-info">Space Jam Rocket Game</h1>
+  <p class="text-secondary">Use Arrow Keys to Dodge the Comets </p>
 </div>
 
 <!-- Game Container -->
@@ -175,12 +175,14 @@ $username = $_SESSION['username'];
 
 <!-- APOD Square Panel -->
 <div id="apodPanel" class="position-absolute top-50 end-0 translate-middle-y bg-dark border border-info rounded-4 shadow-lg p-3 me-3 d-flex flex-column align-items-center justify-content-start" style="width: 300px; height: 300px; overflow:hidden;">
-  <h6 class="text-info fw-bold mb-1 text-center"><i class="fas fa-star me-1"></i>NASA Space Fact</h6>
+  <h6 class="text-info fw-bold mb-1 text-center"><i class="fas fa-star me-1"></i>Daily NASA Space Fact</h6>
   <img id="apodImg" src="" alt="APOD Image" class="img-fluid rounded mb-2" style="width: 100%; height: 120px; object-fit: cover;" />
   <h6 id="apodTitle" class="text-warning fw-bold small text-center mb-1"></h6>
   <p id="apodDesc" class="text-light small text-center" style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;"></p>
   <button id="apodLearnMore" class="btn btn-outline-info btn-sm mt-auto w-100">Learn More</button>
 </div>
+
+
 
 <!-- APOD  Modal -->
 <div class="modal fade" id="apodModal" tabindex="-1" aria-hidden="true">
@@ -200,8 +202,6 @@ $username = $_SESSION['username'];
     </div>
   </div>
 </div>
-
-
 
 
 
