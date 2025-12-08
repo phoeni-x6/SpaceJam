@@ -15,7 +15,7 @@ $username = $_SESSION['username'];
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Space Jam Rocket Game 🚀</title>
+<title>Space Jam Rocket Game </title>
 
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -76,7 +76,7 @@ $username = $_SESSION['username'];
   border-radius: 1rem;
   padding: 1.5rem;
   width: 230px;
-  height: 380px;
+  height: 400px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -117,7 +117,10 @@ $username = $_SESSION['username'];
 }
 
 
-}
+
+
+.options-container {height: auto;
+height: 380px;}
 .options-container h5 { font-weight: 600; }
 .options-container button { width: 100%; padding: 10px; font-weight: 600; }
 .btn-group .btn.active { background-color: var(--bs-success); color: #fff; }
@@ -137,42 +140,7 @@ $username = $_SESSION['username'];
   }
 </style>
 
-<script>
-const canvas = document.getElementById('gameBackground');
-const ctx = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const stars = [];
-for(let i = 0; i < 200; i++){
-  stars.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: Math.random() * 2,
-    speed: Math.random() * 0.5 + 0.2
-  });
-}
-
-function animateStars(){
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  ctx.fillStyle = 'white';
-  stars.forEach(star => {
-    ctx.beginPath();
-    ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
-    ctx.fill();
-    
-    star.y += star.speed;
-    if(star.y > canvas.height) star.y = 0;
-  });
-  
-  requestAnimationFrame(animateStars);
-}
-
-animateStars();
-</script>
 
 <body class="bg-dark text-light d-flex flex-column align-items-center vh-100">
 
@@ -214,6 +182,10 @@ animateStars();
       <button id="musicOff" class="btn btn-outline-danger">Off</button>
     </div>
   </div>
+
+    <button id="startBtn" class="btn btn-success mb-2">
+    <i class="fas fa-play me-2"></i>Start Game
+  </button>
 
   <button id="restartBtn" class="btn btn-outline-info"><i class="fas fa-rotate-right me-2"></i>Restart</button>
   <button id="leaderboardBtn" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#leaderboardModal">
@@ -379,173 +351,7 @@ animateStars();
 <!-- Custom JS -->
 <script src="script.js"></script>
 
-<script>
-// Profile Dropdown Toggle
-const profileToggle = document.getElementById("profileToggle");
-const profileDropdown = document.getElementById("profileDropdown");
-profileToggle.addEventListener("click", () => {
-  profileDropdown.style.display = profileDropdown.style.display === "block" ? "none" : "block";
-});
-document.addEventListener("click", (e) => {
-  if (!profileToggle.contains(e.target)) profileDropdown.style.display = "none";
-});
 
-// Leaderboard
-function fetchLeaderboard() {
-  fetch("fetch_leaderboard.php")
-    .then(res => res.json())
-    .then(data => {
-      const tbody = document.getElementById("leaderboard-body");
-      tbody.innerHTML = "";
-      if (!data.length) tbody.innerHTML = "<tr><td colspan='3'>No scores yet!</td></tr>";
-      else data.forEach(p => {
-        tbody.innerHTML += `<tr><td>${p.rank}</td><td>${p.username}</td><td>${p.score}</td></tr>`;
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("leaderboard-body").innerHTML =
-        "<tr><td colspan='3'>Error loading leaderboard</td></tr>";
-    });
-}
-document.addEventListener("DOMContentLoaded", fetchLeaderboard);
-
-// Music Toggle
-const musicOn = document.getElementById("musicOn");
-const musicOff = document.getElementById("musicOff");
-const bgMusic = document.getElementById("bgMusic");
-let musicEnabled = true;
-
-musicOn.addEventListener("click", () => {
-  musicEnabled = true;
-  musicOn.classList.add("active");
-  musicOff.classList.remove("active");
-  bgMusic.play();
-});
-musicOff.addEventListener("click", () => {
-  musicEnabled = false;
-  musicOff.classList.add("active");
-  musicOn.classList.remove("active");
-  bgMusic.pause();
-});
-
-// Game Over Quiz Submit
-document.getElementById("tryAgainBtn").addEventListener("click", () => {
-  const ans = document.getElementById("answerField").value.trim();
-  if (!ans) { alert("Please enter an answer!"); return; }
-  console.log("Answer submitted:", ans);
-  window.location.reload();
-});
-
-// NASA APOD Fetch
-const apodApiKey = "aGg4WRClHhmQhaYcVy1lcCy6JAoxWFDau6N18ZFO"; 
-const apodUrl = `https://api.nasa.gov/planetary/apod?api_key=${apodApiKey}`;
-
-let apodData = {};
-
-fetch(apodUrl)
-  .then(res => res.json())
-  .then(data => {
-    apodData = data; // store full data for modal
-    // Update square panel
-    document.getElementById("apodImg").src = data.url;
-    document.getElementById("apodImg").alt = data.title;
-    document.getElementById("apodTitle").innerText = data.title;
-    document.getElementById("apodDesc").innerText = data.explanation;
-  })
-  .catch(err => {
-    console.error("Error fetching APOD:", err);
-    document.getElementById("apodTitle").innerText = "Could not load APOD.";
-    document.getElementById("apodDesc").innerText = "";
-  });
-
-// Learn More Button — open modal
-const learnMoreBtn = document.getElementById("apodLearnMore");
-learnMoreBtn.addEventListener("click", () => {
-  document.getElementById("modalApodTitle").innerText = apodData.title;
-  document.getElementById("modalApodImg").src = apodData.url;
-  document.getElementById("modalApodImg").alt = apodData.title;
-  document.getElementById("modalApodDesc").innerText = apodData.explanation;
-  
-  // Show Bootstrap modal
-  const apodModal = new bootstrap.Modal(document.getElementById('apodModal'));
-  apodModal.show();
-});
-
-
-// NEO
-const neoApiKey = "aGg4WRClHhmQhaYcVy1lcCy6JAoxWFDau6N18ZFO"; 
-const neoUrl = `https://api.nasa.gov/neo/rest/v1/feed?api_key=${neoApiKey}`;
-
-let neoList = [];
-let neoIndex = 0;
-
-function loadNeoCard(index, direction = "right") {
-  const card = document.getElementById("neoCard");
-
-  // Animate out
-  card.classList.remove("show");
-  card.classList.add(direction === "right" ? "hide-right" : "hide-left");
-
-  setTimeout(() => {
-    const neo = neoList[index];
-
-    card.innerHTML = `
-      <h6 class="text-warning fw-bold text-center">${neo.name}</h6>
-      <p class="text-light small">
-        <b>⚡ Speed:</b> ${neo.speed.toLocaleString()} km/h <br>
-        <b>📏 Diameter:</b> ${neo.diameter} m <br>
-        <b>🛑 Hazardous:</b> 
-        <span class="${neo.hazard ? "text-danger" : "text-success"} fw-bold">
-          ${neo.hazard ? "YES" : "NO"}
-        </span> <br>
-        <b>📅 Closest Approach:</b><br>${neo.date}
-      </p>
-    `;
-
-    // Reset animation classes
-    card.classList.remove("hide-right", "hide-left");
-
-    setTimeout(() => card.classList.add("show"), 10);
-  }, 300);
-}
-
-fetch(neoUrl)
-  .then(res => res.json())
-  .then(data => {
-    const nearEarthObjects = data.near_earth_objects;
-    const today = Object.keys(nearEarthObjects)[0];
-
-    neoList = nearEarthObjects[today].map(obj => ({
-      name: obj.name,
-      speed: parseFloat(obj.close_approach_data[0].relative_velocity.kilometers_per_hour),
-      diameter: Math.floor(obj.estimated_diameter.meters.estimated_diameter_max),
-      hazard: obj.is_potentially_hazardous_asteroid,
-      date: obj.close_approach_data[0].close_approach_date_full
-    }));
-
-    // Load first card
-    loadNeoCard(neoIndex);
-  })
-  .catch(err => {
-    document.getElementById("neoCard").innerHTML =
-      `<p class="text-danger text-center small">Failed to load NEO data.</p>`;
-  });
-
-
-// Slider Arrows
-document.getElementById("neoNext").addEventListener("click", () => {
-  neoIndex = (neoIndex + 1) % neoList.length;
-  loadNeoCard(neoIndex, "right");
-});
-
-document.getElementById("neoPrev").addEventListener("click", () => {
-  neoIndex = (neoIndex - 1 + neoList.length) % neoList.length;
-  loadNeoCard(neoIndex, "left");
-});
-
-
-</script>
 
 </body>
 </html>
