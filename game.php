@@ -76,12 +76,12 @@ $username = $_SESSION['username'];
   border-radius: 1rem;
   padding: 1.5rem;
   width: 230px;
-  height: 400px;
+  height: 520px; /* increased from 380/460px */
   display: flex;
   flex-direction: column;
   gap: 1rem;
   box-shadow: 0 0 20px rgba(13,202,240,0.4);
-
+}
 #apodPanel {
   width: 300px;
   height: 300px;
@@ -118,9 +118,7 @@ $username = $_SESSION['username'];
 
 
 
-
-.options-container {height: auto;
-height: 380px;}
+.options-container { height: 520px; }
 .options-container h5 { font-weight: 600; }
 .options-container button { width: 100%; padding: 10px; font-weight: 600; }
 .btn-group .btn.active { background-color: var(--bs-success); color: #fff; }
@@ -186,6 +184,11 @@ height: 380px;}
     <button id="startBtn" class="btn btn-success mb-2">
     <i class="fas fa-play me-2"></i>Start Game
   </button>
+
+
+<button id="pauseBtn" class="btn btn-outline-primary mb-2">
+  <i class="fas fa-pause me-2"></i>Pause
+</button>
 
   <button id="restartBtn" class="btn btn-outline-info"><i class="fas fa-rotate-right me-2"></i>Restart</button>
   <button id="leaderboardBtn" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#leaderboardModal">
