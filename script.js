@@ -483,6 +483,7 @@ function updateScore() {
 async function gameOver() {
   gameRunning = false;
   localStorage.setItem("cachedScore", score);
+  quizAttempts = 0; // reset attempts for new game
 
   if (score > highScore) {
     highScore = score;
@@ -544,6 +545,10 @@ async function loadBananaQuizIntoModal() {
 
 
 //quiz handler
+
+let quizAttempts = 0;
+const MAX_QUIZ_ATTEMPTS = 3;
+
 document.getElementById("tryAgainBtn").addEventListener("click", () => {
   const ans = parseInt(document.getElementById("answerField").value.trim());
   const correct = parseInt(window.currentQuiz.solution);
@@ -551,7 +556,7 @@ document.getElementById("tryAgainBtn").addEventListener("click", () => {
   const modal = bootstrap.Modal.getInstance(document.getElementById("gameOverModal"));
 
   if (ans === correct) {
-    //display correct answer popup
+    // Correct answer - resume game
     const qArea = document.getElementById("quizQuestionArea");
     
     qArea.innerHTML = `
@@ -566,41 +571,59 @@ document.getElementById("tryAgainBtn").addEventListener("click", () => {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.3); }
         }
-        @keyframes glow {
-          0%, 100% { text-shadow: 0 0 10px #00ff00; }
-          50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
-        }
       </style>
     `;
     
     setTimeout(() => {
       modal.hide();
+      quizAttempts = 0; // reset attempts
       clearComets();
       resumeGame();
     }, 4000);
   } else {
+    // Wrong answer - increment attempts
+    quizAttempts++;
 
-    //wrong answer popup
-    const qArea = document.getElementById("quizQuestionArea");
-    const username = document.body.getAttribute("data-username") || "Pilot";
-    
-    qArea.innerHTML = `
-      <div class="text-center">
-        <p class="fs-2 mb-3">❌</p>
-        <p class="text-danger fw-bold fs-5">Wrong answer mate!</p>
-        <p class="text-warning">Your rocket crashed into an asteroid 🪨</p>
-        <p class="text-light mt-3">Restarting mission...</p>
-      </div>
-    `;
-    
-    setTimeout(() => {
-      modal.hide();
-      localStorage.setItem("cachedScore", 0);
-      startGame();
-    }, 5000);
+    if (quizAttempts >= MAX_QUIZ_ATTEMPTS) {
+      // Game Over - 3 strikes exceeded
+      const qArea = document.getElementById("quizQuestionArea");
+      
+      qArea.innerHTML = `
+        <div class="text-center">
+          <p class="fs-1 mb-3">💥</p>
+          <p class="text-danger fw-bold fs-4">Mission Failed!</p>
+          <p class="text-warning">You've exceeded your 3 allowed attempts</p>
+          <p class="text-light mt-3">Returning to base...</p>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        modal.hide();
+        quizAttempts = 0; // reset for next game
+        localStorage.setItem("cachedScore", 0);
+        startGame();
+      }, 3000);
+    } else {
+      // Wrong answer but still have chances left
+      const qArea = document.getElementById("quizQuestionArea");
+      const attemptsLeft = MAX_QUIZ_ATTEMPTS - quizAttempts;
+      
+      qArea.innerHTML = `
+        <div class="text-center">
+          <p class="fs-2 mb-3">❌</p>
+          <p class="text-danger fw-bold fs-5">Wrong Answer!</p>
+          <p class="text-warning">Attempts remaining: <strong>${attemptsLeft}</strong></p>
+          <p class="text-light mt-2">Try again or your mission ends...</p>
+        </div>
+      `;
+      
+      // Reload the quiz after showing message
+      setTimeout(() => {
+        loadBananaQuizIntoModal();
+      }, 2000);
+    }
   }
 });
-
 //resume game function
 function resumeGame() {
   gameRunning = true;
